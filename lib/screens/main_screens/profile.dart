@@ -21,6 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String _gender = "Male";
   bool _isEditable = false;
+  bool _isUploading = false;
   File? _profileImage;
   File? _coverImage;
   String? _profileImageUrl;
@@ -88,9 +89,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _pickImage(bool isProfileImage) async {
     try {
+      setState(() {
+        _isUploading = true;
+      });
+
       final ImagePicker picker = ImagePicker();
       final XFile? pickedFile =
-      await picker.pickImage(source: ImageSource.gallery);
+          await picker.pickImage(source: ImageSource.gallery);
 
       if (pickedFile != null) {
         File imageFile = File(pickedFile.path);
@@ -120,12 +125,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SnackBar(content: Text("Failed to upload image.")),
           );
         }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No image selected.")),
+        );
       }
-    } catch (e) {
-      print("Error picking image: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Error picking image.")),
-      );
+    } finally {
+      setState(() {
+        _isUploading = false;
+      });
     }
   }
 
